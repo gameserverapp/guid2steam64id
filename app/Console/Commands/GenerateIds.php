@@ -14,18 +14,20 @@ class GenerateIds extends Command
      *
      * @var string
      */
-    protected $signature = 'generate-ids';
+    protected $signature = 'generate-ids {--truncate} {--batch-size=10000} {--limit=700000000} {--start-batch=1}';
 
     public function handle()
     {
-        //DB::table('translate')->truncate();
+        if($this->option('truncate')) {
+            DB::table('translate')->truncate();
+        }
 
-        $total = env('LIMIT', 700000000);
-        $batchSize = env('BATCH_SIZE', 10000);
+        $total = env('LIMIT', $this->option('limit'));
+        $batchSize = env('BATCH_SIZE', $this->option('batch-size'));
 
         $startTimer = microtime(true);
 
-        $count = env('START_BATCH', 1);
+        $count = env('START_BATCH', $this->option('start-batch'));
         $while = $total;
 
         while($while > 0) {
@@ -45,7 +47,7 @@ class GenerateIds extends Command
         $duration = $endTimer - $startTimer;
 
         $this->info('Duration: ' . $duration);
-        $this->info('Batches: ' . $count);
+        $this->info('Queued batches: ' . $count);
     }
 
     private function batch($batchId, $startId, $itemsPerBatch)
