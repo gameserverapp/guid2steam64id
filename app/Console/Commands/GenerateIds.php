@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\GenerateIdsJob;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -17,23 +18,23 @@ class GenerateIds extends Command
 
     public function handle()
     {
+        //DB::table('translate')->truncate();
 
-        $total = 700000000;
-        $batchSize = 4000;
+        $total = env('LIMIT', 700000000);
+        $batchSize = env('BATCH_SIZE', 1000);
 
         $startTimer = microtime(true);
 
-        $count = 1;
+        $count = env('START_BATCH', 1);
         $while = $total;
 
         while($while > 0) {
 
-            $duration = $this->batch(
+            $this->batch(
+                $count,
                 ($count * $batchSize),
                 $batchSize
             );
-
-            $this->info('Batch [' . $count . '] duration: ' . $duration);
 
             $while = $while - $batchSize;
             $count++;
@@ -46,43 +47,14 @@ class GenerateIds extends Command
         $this->info('Duration: ' . $duration);
     }
 
-    private function batch($startId, $itemsPerBatch)
+    private function batch($batchId, $startId, $itemsPerBatch)
     {
-        $startTimer = microtime(true);
-
-        $data = [];
-
-        for ($i = $startId; $i < ($startId + $itemsPerBatch); $i++) {
-
-            $steam64id = $this->toCommunityID($i);
-            $guid = $this->toGUID($steam64id);
-
-            $data[] = [
-                'steam_id' => $steam64id,
-                'guid' => $guid
-            ];
-        }
-
-        DB::table('translate')->insert($data);
-
-        $endTimer = microtime(true);
-
-        return $endTimer - $startTimer;
-    }
-
-    private function toCommunityID($id)
-    {
-        return bcadd($id, '76561197960265728');
-    }
-
-    private function toGUID($id)
-    {
-        $temp = '';
-
-        for ($i = 0; $i < 8; $i++) {
-            $temp .= chr($id & 0xFF);
-        }
-
-        return md5('BE' . $temp);
+        dispatch(
+            new GenerateIdsJob(
+                $batchId,
+                $startId,
+                $itemsPerBatch
+            )
+        );
     }
 }
