@@ -28,10 +28,12 @@ class GenerateIds extends Command
 
         while($while > 0) {
 
-            $this->batch(
+            $duration = $this->batch(
                 ($count * $batchSize),
                 $batchSize
             );
+
+            $this->info('Batch [' . $count . '] duration: ' . $duration);
 
             $while = $while - $batchSize;
             $count++;
@@ -65,9 +67,7 @@ class GenerateIds extends Command
 
         $endTimer = microtime(true);
 
-        $duration = $endTimer - $startTimer;
-
-        $this->info('Batch duration: ' . $duration);
+        return $endTimer - $startTimer;
     }
 
     private function toCommunityID($id)
