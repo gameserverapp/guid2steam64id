@@ -21,7 +21,7 @@ class GenerateIds extends Command
         //DB::table('translate')->truncate();
 
         $total = env('LIMIT', 700000000);
-        $batchSize = env('BATCH_SIZE', 1000);
+        $batchSize = env('BATCH_SIZE', 10000);
 
         $startTimer = microtime(true);
 
@@ -45,6 +45,7 @@ class GenerateIds extends Command
         $duration = $endTimer - $startTimer;
 
         $this->info('Duration: ' . $duration);
+        $this->info('Batches: ' . $count);
     }
 
     private function batch($batchId, $startId, $itemsPerBatch)
