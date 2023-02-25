@@ -48,7 +48,7 @@ class GenerateIds extends Command
         $duration = $endTimer - $startTimer;
 
         $this->info('Duration: ' . number_format($duration) . ' seconds');
-        $this->info('Queued batches: ' . $count);
+        $this->info('Queued batches: ' . $i);
     }
 
     private function batch(
