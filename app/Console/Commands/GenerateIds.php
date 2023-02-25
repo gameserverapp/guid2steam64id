@@ -38,7 +38,8 @@ class GenerateIds extends Command
             $this->batch(
                 $count,
                 ($count * $batchSize),
-                $batchSize
+                $batchSize,
+                ($todo <= 0 ? $startTimer : false)
             );
 
             $while = $todo;
@@ -58,14 +59,8 @@ class GenerateIds extends Command
         $batchId,
         $startId,
         $itemsPerBatch,
-        $isLast = false
+        $startTime = false
     ) {
-        $startTime = false;
-
-        if($isLast) {
-            $startTime = microtime(true);
-        }
-
         dispatch(
             new GenerateIdsJob(
                 $batchId,
