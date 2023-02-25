@@ -14,9 +14,9 @@ class CreateTranslateTable extends Migration
     public function up()
     {
         Schema::create('translate', function (Blueprint $table) {
-            $table->bigInteger('id');
+            $table->bigInteger('id')->primary();
             $table->bigInteger('steam_id')->unique();
-            $table->string('guid')->index();
+            $table->string('guid', 40)->index();
         });
     }
 

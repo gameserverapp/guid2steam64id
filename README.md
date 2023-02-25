@@ -32,7 +32,8 @@ Allows you to tune the query batch size to your setup.
 #### Override the total number of records generated
 `php artisan generate-ids --limit=10000000`
 
-
+#### Start from a specific batch
+`php artisan generate-ids --start-batch=1`
 
 ### Example output
 This example was generated using `QUEUE_CONNECTION=sync`. When using the Beanstalk queue the output will be different.
@@ -48,6 +49,27 @@ string(39) "Batch [499] Duration: 0.054871082305908"
 string(39) "Batch [500] Duration: 0.039829969406128"
 Duration: 26 seconds
 Queued batches: 501
+```
+
+## 3. Consume API
+When you configured an `API_KEY=` in your `.env` file, make sure to always set a header `x-api-key: {API_KEY}`. The header is only required when `API_KEY=` is not null.
+
+#### Get GUID for Steam 64 ID
+
+`GET http://localhost/steamid/76561198023513722`
+
+Response:
+```http
+{"guid":"cf165a55c873587ecd183628395aeda2"}
+```
+
+#### Get Steam 64 ID for GUID
+
+`GET http://localhost/guid/cf165a55c873587ecd183628395aeda2`
+
+Response:
+```http
+{"steam_id":76561198023513722}
 ```
 
 ___
