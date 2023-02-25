@@ -26,6 +26,7 @@ Depending on your hardware, it may take several hours to build your tables. When
 
 #### Specify batch sizes
 Allows you to tune the query batch size to your setup. 
+
 `php artisan generate-ids --batch-size=2000`
 
 #### Override the total number of records generated
@@ -34,7 +35,7 @@ Allows you to tune the query batch size to your setup.
 
 
 ### Example output
-
+This example was generated using `QUEUE_CONNECTION=sync`. When using the Beanstalk queue the output will be different.
 ```
 $ php artisan generate-ids --truncate --batch-size=2000 --limit=1000000
 string(37) "Batch [1] Duration: 0.097071170806885"
