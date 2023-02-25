@@ -15,7 +15,7 @@ class GenerateIds extends Command
      *
      * @var string
      */
-    protected $signature = 'generate-ids {--truncate} {--batch-size=10000} {--limit=' . self::STEAM_ACCOUNT_MAX_NUM . '} {--start-batch=1}';
+    protected $signature = 'generate-ids {--truncate} {--batch-size=10000} {--limit=' . self::STEAM_ACCOUNT_MAX_NUM . '} {--start-batch=0}';
 
     public function handle()
     {
@@ -29,22 +29,18 @@ class GenerateIds extends Command
         $batchSize = env('BATCH_SIZE', $this->option('batch-size'));
         $count = env('START_BATCH', $this->option('start-batch'));
 
-        $while = $total;
+        $batchCount = $total / $batchSize;
 
-        while($while > 0) {
+        for($i = $count; $i < $batchCount; $i++) {
 
-            $todo = ($while - $batchSize);
+            $isLast = ($batchCount-1) == $i;
 
             $this->batch(
-                $count,
-                ($count * $batchSize),
+                $i,
+                ($i * $batchSize),
                 $batchSize,
-                ($todo <= 0 ? $startTimer : false)
+                ($isLast ? $startTimer : false)
             );
-
-            $while = $todo;
-
-            $count++;
         }
 
         $endTimer = microtime(true);

@@ -84,6 +84,15 @@ To get it running, you need to setup a LEMP / LAMP server that can run Laravel.
 - Supervisor
 - Beanstalkd
 
+### Machine specs
+Generating all records for the database takes time. With powerful hardware you can speed this up.
+
+Tested hardware:
+- 16 vCPUs
+- 32GB RAM
+- SSD disk
+
+Total generation time: 
 ___
 
 ## Security Vulnerabilities
