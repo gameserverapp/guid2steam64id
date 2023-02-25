@@ -2,38 +2,42 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\GenerateIdsJob;
 use Illuminate\Console\Command;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class GenerateIds extends Command
 {
+
+    const STEAM_ACCOUNT_MAX_NUM = 1596147994;
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'generate-ids';
+    protected $signature = 'generate-ids {--truncate} {--batch-size=10000} {--limit=' . self::STEAM_ACCOUNT_MAX_NUM . '} {--start-batch=1}';
 
     public function handle()
     {
-
-        $total = 700000000;
-        $batchSize = 4000;
+        if($this->option('truncate')) {
+            DB::table('translate')->truncate();
+        }
 
         $startTimer = microtime(true);
 
-        $count = 1;
+        $total = env('LIMIT', $this->option('limit'));
+        $batchSize = env('BATCH_SIZE', $this->option('batch-size'));
+        $count = env('START_BATCH', $this->option('start-batch'));
+
         $while = $total;
 
         while($while > 0) {
 
-            $duration = $this->batch(
+            $this->batch(
+                $count,
                 ($count * $batchSize),
                 $batchSize
             );
-
-            $this->info('Batch [' . $count . '] duration: ' . $duration);
 
             $while = $while - $batchSize;
             $count++;
@@ -43,46 +47,18 @@ class GenerateIds extends Command
 
         $duration = $endTimer - $startTimer;
 
-        $this->info('Duration: ' . $duration);
+        $this->info('Duration: ' . number_format($duration) . ' seconds');
+        $this->info('Queued batches: ' . $count);
     }
 
-    private function batch($startId, $itemsPerBatch)
+    private function batch($batchId, $startId, $itemsPerBatch)
     {
-        $startTimer = microtime(true);
-
-        $data = [];
-
-        for ($i = $startId; $i < ($startId + $itemsPerBatch); $i++) {
-
-            $steam64id = $this->toCommunityID($i);
-            $guid = $this->toGUID($steam64id);
-
-            $data[] = [
-                'steam_id' => $steam64id,
-                'guid' => $guid
-            ];
-        }
-
-        DB::table('translate')->insert($data);
-
-        $endTimer = microtime(true);
-
-        return $endTimer - $startTimer;
-    }
-
-    private function toCommunityID($id)
-    {
-        return bcadd($id, '76561197960265728');
-    }
-
-    private function toGUID($id)
-    {
-        $temp = '';
-
-        for ($i = 0; $i < 8; $i++) {
-            $temp .= chr($id & 0xFF);
-        }
-
-        return md5('BE' . $temp);
+        dispatch(
+            new GenerateIdsJob(
+                $batchId,
+                $startId,
+                $itemsPerBatch
+            )
+        );
     }
 }

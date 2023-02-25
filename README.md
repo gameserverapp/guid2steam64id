@@ -1,24 +1,79 @@
-# Lumen PHP Framework
+# BattlEye GUID to Steam64 ID (and back)
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://img.shields.io/packagist/dt/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://img.shields.io/packagist/v/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://img.shields.io/packagist/l/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
+A simple micro service helps setup a self-hosted REST API to translate BattlEye GUIDs into Steam 64 IDs. You build your own database.
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+## 1. Installation
+You need to make sure you setup a hosting environment that can run Laravel. See requirements below.
 
-## Official Documentation
+1. Clone in your webroot `git clone git@github.com:gameserverapp/guid2steam64id.git .`.
+2. Run `composer install` to install required packages.
+3. Configure your `.env` file and confirm a working DB connection.
+   1. Setup database (MariaDB)
+   2. Configure queue (Beanstalk)
+4. Setup Supervisor worker (see `{APP ROOT}/files/supervisor_process`)
+5. Generate database  (next step).
 
-Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
+## 2. Build your database tables
+Your database will start empty. This micro service comes with a generator to populate your database.
 
-## Contributing
+Depending on your hardware, it may take several hours to build your tables. When using queues this can be done in the background.
 
-Thank you for considering contributing to Lumen! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+`php artisan generate-ids`
+
+
+#### Truncate database before starting
+`php artisan generate-ids --truncate`
+
+#### Specify batch sizes
+Allows you to tune the query batch size to your setup. 
+
+`php artisan generate-ids --batch-size=2000`
+
+#### Override the total number of records generated
+`php artisan generate-ids --limit=10000000`
+
+
+
+### Example output
+This example was generated using `QUEUE_CONNECTION=sync`. When using the Beanstalk queue the output will be different.
+```
+$ php artisan generate-ids --truncate --batch-size=2000 --limit=1000000
+string(37) "Batch [1] Duration: 0.097071170806885"
+string(36) "Batch [2] Duration: 0.13755321502686"
+string(37) "Batch [3] Duration: 0.089584827423096"
+....
+....
+string(39) "Batch [498] Duration: 0.041013956069946"
+string(39) "Batch [499] Duration: 0.054871082305908"
+string(39) "Batch [500] Duration: 0.039829969406128"
+Duration: 26 seconds
+Queued batches: 501
+```
+
+___
+
+## Requirements
+To get it running, you need to setup a LEMP / LAMP server that can run Laravel.
+
+- PHP 7.3
+- NGINX (or Apache)
+- MariabDB (or MySQL)
+- Composer
+- Supervisor
+- Beanstalkd
+
+___
 
 ## Security Vulnerabilities
 
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within Lumen, please send an e-mail to GameServerApp at support@gameserverapp.com. All security vulnerabilities will be promptly addressed.
 
 ## License
 
-The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This GUID2Steam64ID micro service is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+___
+
+## Official Lumen & Laravel Documentation
+
+Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
