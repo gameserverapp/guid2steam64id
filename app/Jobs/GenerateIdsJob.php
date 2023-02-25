@@ -40,6 +40,10 @@ class GenerateIdsJob extends Job
             ];
         }
 
+        if(env('APP_DEBUG')) {
+            $startDbTimer = microtime(true);
+        }
+
         DB::table('translate')->insert($data);
 
         if(env('APP_DEBUG')) {
@@ -47,8 +51,9 @@ class GenerateIdsJob extends Job
             $endTimer = microtime(true);
 
             $duration = $endTimer - $startTimer;
+            $durationDb = $endTimer - $startDbTimer;
 
-            var_dump('Batch [' . $this->batchId . '] Duration: ' . $duration . ' seconds');
+            var_dump('Batch [' . $this->batchId . '] Duration: ' . $duration . ' seconds | DB duration: ' . $durationDb . ' seconds');
         }
     }
 
