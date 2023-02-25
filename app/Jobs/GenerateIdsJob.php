@@ -22,7 +22,9 @@ class GenerateIdsJob extends Job
 
     public function handle()
     {
-        $startTimer = microtime(true);
+        if(env('APP_DEBUG')) {
+            $startTimer = microtime(true);
+        }
 
         $data = [];
 
@@ -32,6 +34,7 @@ class GenerateIdsJob extends Job
             $guid = $this->toGUID($steam64id);
 
             $data[] = [
+                'id' => $i,
                 'steam_id' => $steam64id,
                 'guid' => $guid
             ];
@@ -39,11 +42,14 @@ class GenerateIdsJob extends Job
 
         DB::table('translate')->insert($data);
 
-        $endTimer = microtime(true);
+        if(env('APP_DEBUG')) {
 
-        $duration = $endTimer - $startTimer;
+            $endTimer = microtime(true);
 
-        var_dump('Batch [' . $this->batchId . '] Duration: ' . $duration);
+            $duration = $endTimer - $startTimer;
+
+            var_dump('Batch [' . $this->batchId . '] Duration: ' . $duration . ' seconds');
+        }
     }
 
     private function toCommunityID($id)
