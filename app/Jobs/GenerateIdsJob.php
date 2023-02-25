@@ -53,7 +53,11 @@ class GenerateIdsJob extends Job
             $duration = $endTimer - $startTimer;
             $durationDb = $endTimer - $startDbTimer;
 
-            var_dump('Batch [' . $this->batchId . '] Duration: ' . $duration . ' seconds | DB duration: ' . $durationDb . ' seconds');
+            var_dump(
+                'Batch [' . $this->batchId . ']' . "\n" .
+                'Generating : ' . ( $duration - $durationDb ) . 'seconds' . "\n" .
+                'DB insert: ' . $durationDb . ' seconds' . "\n"
+            );
         }
     }
 
