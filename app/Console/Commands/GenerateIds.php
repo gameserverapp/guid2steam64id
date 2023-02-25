@@ -33,13 +33,16 @@ class GenerateIds extends Command
 
         while($while > 0) {
 
+            $todo = ($while - $batchSize);
+
             $this->batch(
                 $count,
                 ($count * $batchSize),
                 $batchSize
             );
 
-            $while = $while - $batchSize;
+            $while = $todo;
+
             $count++;
         }
 
@@ -51,13 +54,24 @@ class GenerateIds extends Command
         $this->info('Queued batches: ' . $count);
     }
 
-    private function batch($batchId, $startId, $itemsPerBatch)
-    {
+    private function batch(
+        $batchId,
+        $startId,
+        $itemsPerBatch,
+        $isLast = false
+    ) {
+        $startTime = false;
+
+        if($isLast) {
+            $startTime = microtime(true);
+        }
+
         dispatch(
             new GenerateIdsJob(
                 $batchId,
                 $startId,
-                $itemsPerBatch
+                $itemsPerBatch,
+                $startTime
             )
         );
     }

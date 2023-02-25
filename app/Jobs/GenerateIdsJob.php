@@ -9,15 +9,18 @@ class GenerateIdsJob extends Job
     private $startId;
     private $batchSize;
     private $batchId;
+    private $startTime;
 
     public function __construct(
         $batchId,
         $startId,
-        $batchSize
+        $batchSize,
+        $startTime
     ) {
         $this->batchId = $batchId;
         $this->startId = $startId;
         $this->batchSize = $batchSize;
+        $this->startTime = $startTime;
     }
 
     public function handle()
@@ -56,8 +59,15 @@ class GenerateIdsJob extends Job
             var_dump(
                 'Batch [' . $this->batchId . ']' . "\n" .
                 'Generating : ' . ( $duration - $durationDb ) . 'seconds' . "\n" .
-                'DB insert: ' . $durationDb . ' seconds' . "\n"
+                'DB insert: ' . $durationDb . ' seconds' . "\n" .
+                'Total: ' . $duration . ' seconds' . "\n"
             );
+
+            if($this->startTime) {
+                var_dump(
+                    'Total duration: ' . (microtime(true) - $this->startTime) . ' seconds'
+                );
+            }
         }
     }
 
