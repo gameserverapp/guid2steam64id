@@ -29,6 +29,10 @@ class GenerateIds extends Command
         $batchSize = env('BATCH_SIZE', $this->option('batch-size'));
         $count = env('START_BATCH', $this->option('start-batch'));
 
+        if($count > 0 and $count > $batchSize) {
+            $count = $count / $batchSize;
+        }
+
         $batchCount = $total / $batchSize;
 
         for($i = $count; $i < $batchCount; $i++) {
