@@ -15,7 +15,7 @@ class GenerateIds extends Command
      *
      * @var string
      */
-    protected $signature = 'generate-ids {--truncate} {--batch-size=10000} {--limit=' . self::STEAM_ACCOUNT_MAX_NUM . '} {--start-batch=1}';
+    protected $signature = 'generate-ids {--truncate} {--batch-size=10000} {--limit=' . self::STEAM_ACCOUNT_MAX_NUM . '} {--start-batch=0}';
 
     public function handle()
     {
@@ -29,18 +29,18 @@ class GenerateIds extends Command
         $batchSize = env('BATCH_SIZE', $this->option('batch-size'));
         $count = env('START_BATCH', $this->option('start-batch'));
 
-        $while = $total;
+        $batchCount = $total / $batchSize;
 
-        while($while > 0) {
+        for($i = $count; $i < $batchCount; $i++) {
+
+            $isLast = ($batchCount-1) == $i;
 
             $this->batch(
-                $count,
-                ($count * $batchSize),
-                $batchSize
+                $i,
+                ($i * $batchSize),
+                $batchSize,
+                ($isLast ? $startTimer : false)
             );
-
-            $while = $while - $batchSize;
-            $count++;
         }
 
         $endTimer = microtime(true);
@@ -48,16 +48,21 @@ class GenerateIds extends Command
         $duration = $endTimer - $startTimer;
 
         $this->info('Duration: ' . number_format($duration) . ' seconds');
-        $this->info('Queued batches: ' . $count);
+        $this->info('Queued batches: ' . $i);
     }
 
-    private function batch($batchId, $startId, $itemsPerBatch)
-    {
+    private function batch(
+        $batchId,
+        $startId,
+        $itemsPerBatch,
+        $startTime = false
+    ) {
         dispatch(
             new GenerateIdsJob(
                 $batchId,
                 $startId,
-                $itemsPerBatch
+                $itemsPerBatch,
+                $startTime
             )
         );
     }

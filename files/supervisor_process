@@ -1,13 +1,13 @@
 [program:g2s64id]
-command=/usr/bin/php /var/www/site/artisan queue:work beanstalkd --tries=3 --sleep=0.1 --timeout=60 --memory=40 --delay=1
+command=/usr/bin/php /var/www/guid2steam64id.gameserverapp.net/current/artisan queue:work beanstalkd --tries=3 --timeout=60 --memory=40 --delay=1
 
 process_name = %(program_name)s_%(process_num)02d
 autostart=true
 autorestart=true
-numprocs=4
+numprocs=16  #use same as number of threads on CPU
 redirect_stderr=true
-stderr_logfile=/var/log/supervisor/worker.err.log
-stdout_logfile=/var/log/supervisor/worker.out.log
+stderr_logfile=/var/log/supervisor/guid2steam64id.err.log
+stdout_logfile=/var/log/supervisor/guid2steam64id.out.log
 
 #stdout_logfile=/dev/null
 #logfile_maxbytes=0

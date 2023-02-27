@@ -9,15 +9,18 @@ class GenerateIdsJob extends Job
     private $startId;
     private $batchSize;
     private $batchId;
+    private $startTime;
 
     public function __construct(
         $batchId,
         $startId,
-        $batchSize
+        $batchSize,
+        $startTime
     ) {
         $this->batchId = $batchId;
         $this->startId = $startId;
         $this->batchSize = $batchSize;
+        $this->startTime = $startTime;
     }
 
     public function handle()
@@ -40,6 +43,10 @@ class GenerateIdsJob extends Job
             ];
         }
 
+        if(env('APP_DEBUG')) {
+            $startDbTimer = microtime(true);
+        }
+
         DB::table('translate')->insert($data);
 
         if(env('APP_DEBUG')) {
@@ -47,8 +54,21 @@ class GenerateIdsJob extends Job
             $endTimer = microtime(true);
 
             $duration = $endTimer - $startTimer;
+            $durationDb = $endTimer - $startDbTimer;
 
-            var_dump('Batch [' . $this->batchId . '] Duration: ' . $duration . ' seconds');
+            print(
+                'Batch [' . $this->batchId . ']' . "\n" .
+                'Range: ' . $this->startId . ' - ' . ($this->startId + $this->batchSize) . "\n" .
+                'Generating : ' . ( $duration - $durationDb ) . 'seconds' . "\n" .
+                'DB insert: ' . $durationDb . ' seconds' . "\n" .
+                'Total: ' . $duration . ' seconds' . "\n\n"
+            );
+        }
+
+        if($this->startTime) {
+            print(
+                'Total duration: ' . (microtime(true) - $this->startTime) . ' seconds' . "\n\n"
+            );
         }
     }
 
