@@ -38,17 +38,41 @@ Allows you to tune the query batch size to your setup.
 ### Example output
 This example was generated using `QUEUE_CONNECTION=sync`. When using the Beanstalk queue the output will be different.
 ```
-$ php artisan generate-ids --truncate --batch-size=2000 --limit=1000000
-string(37) "Batch [1] Duration: 0.097071170806885"
-string(36) "Batch [2] Duration: 0.13755321502686"
-string(37) "Batch [3] Duration: 0.089584827423096"
-....
-....
-string(39) "Batch [498] Duration: 0.041013956069946"
-string(39) "Batch [499] Duration: 0.054871082305908"
-string(39) "Batch [500] Duration: 0.039829969406128"
-Duration: 26 seconds
-Queued batches: 501
+$ php artisan generate-ids --truncate --batch-size=20000 --limit=100000
+Batch [0]
+Range: 0 - 20000
+Generating : 0.024358034133911seconds
+DB insert: 0.46555018424988 seconds
+Total: 0.48990821838379 seconds
+
+Batch [1]
+Range: 20000 - 40000
+Generating : 0.022361993789673seconds
+DB insert: 0.36701893806458 seconds
+Total: 0.38938093185425 seconds
+
+Batch [2]
+Range: 40000 - 60000
+Generating : 0.022462129592896seconds
+DB insert: 0.33245801925659 seconds
+Total: 0.35492014884949 seconds
+
+Batch [3]
+Range: 60000 - 80000
+Generating : 0.020737886428833seconds
+DB insert: 0.35794305801392 seconds
+Total: 0.37868094444275 seconds
+
+Batch [4]
+Range: 80000 - 100000
+Generating : 0.022891998291016seconds
+DB insert: 0.33835911750793 seconds
+Total: 0.36125111579895 seconds
+
+Total duration: 2.131000995636 seconds
+
+Duration: 2 seconds
+Queued batches: 5
 ```
 
 ## 3. Consume API
@@ -90,9 +114,10 @@ Generating all records for the database takes time. With powerful hardware you c
 Tested hardware:
 - 16 vCPUs
 - 32GB RAM
-- SSD disk
+- SSD disk (min 200GB)
 
-Total generation time: 
+Command: `php artisan generate-ids --truncate --batch-size=8000`
+Database population time: approx. 24 hours
 ___
 
 ## Security Vulnerabilities
