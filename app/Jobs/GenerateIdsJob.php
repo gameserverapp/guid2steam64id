@@ -30,41 +30,51 @@ class GenerateIdsJob extends Job
             $startTimer = microtime(true);
         }
 
-        $csvHeader = [
+        $f = fopen('php://memory', 'r+');
+
+        fputcsv($f, [
             'id',
             'steam_id',
             'guid'
-        ];
-
-        $f = fopen('php://memory', 'r+');
-
-        fputcsv($f, $csvHeader);
+        ]);
 
         for ($i = $this->startId; $i < ($this->startId + $this->batchSize); $i++) {
 
             $steam64id = $this->toCommunityID($i);
 
             fputcsv($f, [
-                $i,
-                $steam64id,
-                $this->toGUID($steam64id)
-            ]);
+                    $i,
+                    $steam64id,
+                    $this->toGUID($steam64id)
+                ],
+                ','
+            );
         }
 
         rewind($f);
         $data = stream_get_contents($f);
 
+        $path = storage_path('app') . '/batch-' . $this->batchId . '.csv';
+        File::put($path, $data);
+
         if(env('APP_DEBUG')) {
             $startDbTimer = microtime(true);
         }
 
-        $path = storage_path('app') . '/batch-' . $this->batchId . '.csv';
-        File::put($path, $data);
+        $query = 'LOAD DATA LOCAL INFILE \'' . $path . '\'
+                    IGNORE
+                    INTO TABLE `translate`
+                FIELDS
+                    TERMINATED BY ","
+                    OPTIONALLY ENCLOSED BY "\""
+                LINES
+                    TERMINATED BY "\n"
+                IGNORE 1 lines
+                (id, steam_id, guid);';
 
-        $query = "LOAD DATA LOCAL INFILE '" . $path . "' INTO TABLE translate (id, steam_id, guid)";
         DB::connection()->getpdo()->exec($query);
 
-//        DB::table('translate')->insertOrIgnore($data);
+        File::delete($path);
 
         if(env('APP_DEBUG')) {
 
