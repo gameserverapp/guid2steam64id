@@ -61,7 +61,8 @@ class GenerateIdsJob extends Job
             $startDbTimer = microtime(true);
         }
 
-        $query = 'LOAD DATA LOCAL INFILE \'' . $path . '\'
+        $query = 'SET unique_checks=0;
+                LOAD DATA LOCAL INFILE \'' . $path . '\'
                     IGNORE
                     INTO TABLE `translate`
                 FIELDS
@@ -70,7 +71,8 @@ class GenerateIdsJob extends Job
                 LINES
                     TERMINATED BY "\n"
                 IGNORE 1 lines
-                (id, steam_id, guid);';
+                (id, steam_id, guid);
+                SET unique_checks=1;';
 
         DB::connection()->getpdo()->exec($query);
 

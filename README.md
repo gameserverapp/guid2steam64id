@@ -116,7 +116,7 @@ Tested hardware:
 - 32GB RAM
 - SSD disk (min 200GB)
 
-Command: `php artisan generate-ids --truncate --batch-size=1000000`
+Command: `php artisan generate-ids --truncate --batch-size=10000`
 
 Database population time: approx. 24 hours
 ___
