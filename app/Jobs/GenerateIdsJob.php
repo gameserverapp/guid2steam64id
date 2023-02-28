@@ -61,7 +61,7 @@ class GenerateIdsJob extends Job
             $startDbTimer = microtime(true);
         }
 
-        $query = 'LOAD DATA CONCURRENT LOCAL INFILE \'' . $path . '\'
+        $query = 'LOAD DATA LOCAL INFILE \'' . $path . '\'
                     IGNORE
                     INTO TABLE `translate`
                 FIELDS
