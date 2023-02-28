@@ -47,7 +47,7 @@ class GenerateIdsJob extends Job
             $startDbTimer = microtime(true);
         }
 
-        DB::table('translate')->insert($data);
+        DB::table('translate')->insertOrIgnore($data);
 
         if(env('APP_DEBUG')) {
 
