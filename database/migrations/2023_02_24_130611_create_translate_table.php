@@ -16,7 +16,7 @@ class CreateTranslateTable extends Migration
         Schema::create('translate', function (Blueprint $table) {
             $table->bigInteger('id')->primary();
             $table->bigInteger('steam_id');
-            $table->string('guid', 40);
+            $table->string('guid', 40)->index();
         });
     }
 
