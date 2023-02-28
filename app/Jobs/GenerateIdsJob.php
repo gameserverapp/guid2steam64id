@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class GenerateIdsJob extends Job
 {
@@ -29,25 +30,41 @@ class GenerateIdsJob extends Job
             $startTimer = microtime(true);
         }
 
-        $data = [];
+        $csvHeader = [
+            'id',
+            'steam_id',
+            'guid'
+        ];
+
+        $f = fopen('php://memory', 'r+');
+
+        fputcsv($f, $csvHeader);
 
         for ($i = $this->startId; $i < ($this->startId + $this->batchSize); $i++) {
 
             $steam64id = $this->toCommunityID($i);
-            $guid = $this->toGUID($steam64id);
 
-            $data[] = [
-                'id' => $i,
-                'steam_id' => $steam64id,
-                'guid' => $guid
-            ];
+            fputcsv($f, [
+                $i,
+                $steam64id,
+                $this->toGUID($steam64id)
+            ]);
         }
+
+        rewind($f);
+        $data = stream_get_contents($f);
 
         if(env('APP_DEBUG')) {
             $startDbTimer = microtime(true);
         }
 
-        DB::table('translate')->insertOrIgnore($data);
+        $path = storage_path('app') . '/batch-' . $this->batchId . '.csv';
+        File::put($path, $data);
+
+        $query = "LOAD DATA LOCAL INFILE '" . $path . "' INTO TABLE translate (id, steam_id, guid)";
+        DB::connection()->getpdo()->exec($query);
+
+//        DB::table('translate')->insertOrIgnore($data);
 
         if(env('APP_DEBUG')) {
 
@@ -59,7 +76,7 @@ class GenerateIdsJob extends Job
             print(
                 'Batch [' . $this->batchId . ']' . "\n" .
                 'Range: ' . $this->startId . ' - ' . ($this->startId + $this->batchSize) . "\n" .
-                'Generating : ' . ( $duration - $durationDb ) . 'seconds' . "\n" .
+                'Generating : ' . ( $duration - $durationDb ) . ' seconds' . "\n" .
                 'DB insert: ' . $durationDb . ' seconds' . "\n" .
                 'Total: ' . $duration . ' seconds' . "\n\n"
             );
